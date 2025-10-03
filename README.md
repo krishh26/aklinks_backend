@@ -12,7 +12,7 @@ npm install
 
 Create a `.env` file in the root directory.
 
-### 4. Run the Application
+### 3. Run the Application
 
 ```bash
 # Development mode with auto-reload

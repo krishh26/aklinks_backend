@@ -3,9 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
 import { errorHandler, notFound } from './middlewares/errorMiddleware';
+import Routes from './routes';
 
 // Load environment variables
 dotenv.config();
@@ -29,13 +28,13 @@ app.get('/', (req, res) => {
     message: 'AKLinks Backend API is running!',
     version: '1.0.0',
     endpoints: {
-      auth: '/api/auth',
-      users: '/api/users'
+      auth: '/api/v1/auth',
+      users: '/api/v1/users'
     }
   });
 });
 
-app.get('/api/health', (req, res) => {
+app.get('/api/v1/health', (req, res) => {
   res.json({
     status: 'success',
     message: 'Server is healthy',
@@ -45,8 +44,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/v1', Routes);
 
 // Error handling middleware
 app.use(notFound); // Handle 404 errors
