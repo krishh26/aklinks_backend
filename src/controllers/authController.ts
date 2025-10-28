@@ -23,7 +23,8 @@ export const register = async (req: Request, res: Response, next: NextFunction):
       name,
       email,
       password,
-      role
+      role,
+      provider: 'local'
     });
 
     await user.save();
@@ -208,6 +209,7 @@ export const getMe = async (req: any, res: Response, next: NextFunction): Promis
           name: req.user.name,
           email: req.user.email,
           role: req.user.role,
+          avatar: (req.user as any).avatar,
           createdAt: req.user.createdAt,
           updatedAt: req.user.updatedAt
         }

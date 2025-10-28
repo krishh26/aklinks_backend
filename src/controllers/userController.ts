@@ -78,7 +78,20 @@ export const changePassword = async (req: any, res: Response, next: NextFunction
       return;
     }
 
-    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!user.password) {
+      res.status(400).json({
+        status: 'error',
+        message: 'User does not have a password set'
+      });
+      return;
+    }
+
+    if (user.provider === 'google') {
+      res.status(400).json({ message: 'Google login users cannot change password.' });
+      return;
+    }
+    
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password as string);
     if (!isPasswordValid) {
       res.status(400).json({
         status: 'error',
