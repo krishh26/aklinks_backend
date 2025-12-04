@@ -32,6 +32,12 @@ export const errorHandler = (error: ApiError, req: Request, res: Response, next:
   let statusCode = error.statusCode || 500;
   let message = error.message || 'Internal Server Error';
 
+  // Handle CORS errors specifically
+  if (error.message && error.message.includes('CORS')) {
+    statusCode = 403;
+    message = 'CORS policy violation';
+  }
+
   // Handle specific Mongoose errors
   if (error.name === 'ValidationError') {
     statusCode = 400;
@@ -61,6 +67,7 @@ export const errorHandler = (error: ApiError, req: Request, res: Response, next:
     message = 'Token expired';
   }
 
+  // Ensure CORS headers are set even in error responses
   res.status(statusCode).json({
     status: 'error',
     message,
