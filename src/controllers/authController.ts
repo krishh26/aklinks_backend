@@ -219,3 +219,43 @@ export const getMe = async (req: any, res: Response, next: NextFunction): Promis
     next(error);
   }
 };
+
+export const createMasterAdmin = async (req: any, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+       res.status(400).json({ message: 'Name, email and password are required' });
+       return
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      res.status(400).json({ message: 'User with this email already exists' });
+      return
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password: password,
+      role: 'super_admin',
+      provider: 'local'
+    });
+
+     res.status(201).json({
+      message: 'Master admin created successfully',
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to create master admin'
+    });
+  }
+};

@@ -4,9 +4,10 @@ import {
   login,
   forgotPassword,
   resetPassword,
-  getMe
+  getMe,
+  createMasterAdmin
 } from '../controllers/authController';
-import { authenticate } from '../middlewares/authMiddleware';
+import { authenticate, authorize } from '../middlewares/authMiddleware';
 import { handleValidationErrors } from '../middlewares/errorMiddleware';
 import {
   registerValidation,
@@ -25,6 +26,7 @@ router.post('/reset-password', resetPasswordValidation, handleValidationErrors, 
 
 // Protected routes
 router.get('/profile', authenticate, getMe);
+router.post('/create-master', authenticate, authorize('super_admin'), createMasterAdmin);
 
 export default router;
 
