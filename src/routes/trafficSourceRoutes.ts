@@ -19,8 +19,8 @@ router.put('/update/:id', authenticate, updateMyTrafficSource);
 router.delete('/delete/:id', authenticate, deleteMyTrafficSource);
 
 //Admin
-router.get('/admin/get', authenticate, authorize('super_admin'), getAllTrafficSources);
-router.patch('/update/:id/status', authenticate, authorize('super_admin'), updateTrafficSourceStatus);
-router.delete('/admin/delete/:id', authenticate, authorize('super_admin'), deleteTrafficSourceAdmin);
+router.get('/admin/get', authenticate, authorize('admin'), getAllTrafficSources);
+router.patch('/update/:id/status', authenticate, authorize('admin'), updateTrafficSourceStatus);
+router.delete('/admin/delete/:id', authenticate, authorize('admin'), deleteTrafficSourceAdmin);
 
 export default router;
