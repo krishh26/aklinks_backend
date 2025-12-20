@@ -81,9 +81,8 @@ export const createLink = async (req: Request, res: Response): Promise<void> => 
 // Get all links for the authenticated user (excluding soft deleted)
 export const getAllLinks = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = (req as any).user?._id; // Get user ID from authenticated request
 
-    const links = await Link.find({ userId, deleted: false })
+    const links = await Link.find({ deleted: false })
       .sort({ createdAt: -1 })
       .select('-__v');
 
@@ -132,6 +131,77 @@ export const deleteLink = async (req: Request, res: Response): Promise<void> => 
     res.status(200).json({
       status: 'success',
       message: 'Link deleted successfully',
+      data: {
+        id: link._id
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to delete link'
+    });
+  }
+};
+
+// Get links for a user by user id (admin)
+export const getLinksByUserId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      res.status(400).json({
+        status: 'error',
+        message: 'User ID is required'
+      });
+      return;
+    }
+
+    const links = await Link.find({ userId, deleted: false })
+      .sort({ createdAt: -1 })
+      .select('-__v');
+
+    res.status(200).json({
+      status: 'success',
+      data: links
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to fetch links by user id'
+    });
+  }
+};
+
+// Admin soft delete any link by id
+export const adminDeleteLink = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Link ID is required'
+      });
+      return;
+    }
+
+    const link = await Link.findById(id);
+
+    if (!link) {
+      res.status(404).json({
+        status: 'error',
+        message: 'Link not found'
+      });
+      return;
+    }
+
+    link.deleted = true;
+    link.deletedAt = new Date();
+    await link.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Link deleted successfully by admin',
       data: {
         id: link._id
       }
