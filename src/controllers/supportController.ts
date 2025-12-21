@@ -103,8 +103,21 @@ export const createSupport = async (req: any, res: Response): Promise<void> => {
 // Admin: get all support messages
 export const getAllSupport = async (req: Request, res: Response): Promise<void> => {
     try {
-        const items = await Support.find().sort({ createdAt: -1 }).select('-__v');
-        res.status(200).json({ status: 'success', data: items });
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search as string || '';
+        const items = await Support.find({ name: { $regex: search, $options: 'i' } }).sort({ createdAt: -1 }).select('-__v').skip(skip).limit(limit);
+        const totalItems = await Support.countDocuments();
+        const totalPages = Math.ceil(totalItems / limit);
+        res.status(200).json({ status: 'success', data: {
+            items,
+            pagination: {
+                totalItems,
+                totalPages,
+                currentPage: page
+            }
+        } });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to fetch support messages' });
     }

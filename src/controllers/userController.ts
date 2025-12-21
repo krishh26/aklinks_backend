@@ -118,7 +118,9 @@ export const getAllUsers = async (req: any, res: Response, next: NextFunction): 
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const users = await User.find({})
+    const search = req.query.search as string || '';
+    
+    const users = await User.find({ name: { $regex: search, $options: 'i' } })
       .select('-password -resetPasswordToken -resetPasswordExpires')
       .sort({ createdAt: -1 })
       .skip(skip)
