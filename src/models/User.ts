@@ -51,6 +51,10 @@ const UserSchema = new mongoose.Schema(
       enum: ['local', 'google'],
       default: 'local'
     },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
     createdAt: {
       type: Date,
       default: Date.now

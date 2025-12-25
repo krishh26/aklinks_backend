@@ -4,7 +4,8 @@ import {
   getAllLinks,
   deleteLink,
   getLinksByUserId,
-  adminDeleteLink
+  adminDeleteLink,
+  toggleLinkStatus
 } from '../controllers/linkController';
 import { authenticate, authorize } from '../middlewares/authMiddleware';
 
@@ -16,7 +17,8 @@ router.get('/all', authenticate, authorize('admin'), getAllLinks);
 router.delete('/:id', authenticate, deleteLink);
 
 // Admin routes
-router.get('/user/:userId', authenticate, getLinksByUserId);
+router.get('/user/:userId', authenticate, authorize('admin'), getLinksByUserId);
+router.put('/:id/toggle-status', authenticate, authorize('admin'), toggleLinkStatus);
 router.delete('/:id/admin', authenticate, authorize('admin'), adminDeleteLink);
 
 export default router;
