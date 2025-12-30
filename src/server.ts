@@ -36,10 +36,10 @@ app.use(cors({
       'http://localhost:4200/',
       'http://127.0.0.1:4200',
       'http://127.0.0.1:4200/',
-      'https://aklinks.in/',
-      'https://ads.aklinks.in/',
-      'http://ads.aklinks.in/',
-      'http://aklinks.in/'
+      'https://aklinks.in',
+      'https://ads.aklinks.in',
+      'http://ads.aklinks.in',
+      'http://aklinks.in',
     ];
     
     // Allow requests from allowed origins
