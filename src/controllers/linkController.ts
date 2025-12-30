@@ -271,9 +271,8 @@ export const toggleLinkStatus = async (req: Request, res: Response): Promise<voi
     link.deleted = !link.deleted;
     if (link.deleted) {
       link.deletedAt = new Date();
-    } else {
-      link.deletedAt = null;
     }
+    
     await link.save();
 
     res.status(200).json({
