@@ -5,112 +5,110 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import connectDB from './config/db';
 import passport from './config/googleAuth';
-import { errorHandler, notFound } from './middlewares/errorMiddleware';
 import Routes from './routes';
+import { errorHandler, notFound } from './middlewares/errorMiddleware';
 
-// Load environment variables
+// Load env variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+/* ===========================
+   DATABASE
+=========================== */
 connectDB();
 
-// Middleware
-// Configure helmet to work with CORS
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
-})); // Security headers
+/* ===========================
+   SECURITY HEADERS
+=========================== */
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
-// CORS Configuration - Fix CORS issues permanently
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // List of allowed origins
-    const allowedOrigins = [
-      'http://localhost:4200',
-      'http://localhost:4200/',
-      'http://127.0.0.1:4200',
-      'http://127.0.0.1:4200/',
+/* ===========================
+   CORS (SIMPLE & CORRECT)
+=========================== */
+app.use(
+  cors({
+    origin: [
       'https://aklinks.in',
       'https://ads.aklinks.in',
-      'http://ads.aklinks.in',
-      'http://aklinks.in',
-    ];
-    
-    // Allow requests from allowed origins
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
+      'http://localhost:4200',
+    ],
+    credentials: true,
+  })
+);
 
-// Handle preflight requests
-app.options('*', cors());
+/* ===========================
+   BODY PARSERS (MUST BE FIRST)
+=========================== */
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-session-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+/* ===========================
+   SESSION (CROSS-DOMAIN SAFE)
+=========================== */
+app.use(
+  session({
+    name: 'aklinks.sid',
+    secret: process.env.SESSION_SECRET || 'aklinks-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: true,          // HTTPS required
+      httpOnly: true,
+      sameSite: 'none',      // 🔴 REQUIRED for cross-domain
+      domain: '.aklinks.in', // 🔴 REQUIRED
+      maxAge: 24 * 60 * 60 * 1000, // 24h
+    },
+  })
+);
 
-// Passport middleware
+/* ===========================
+   PASSPORT
+=========================== */
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
-
-// Routes
-app.get('/', (req, res) => {
+/* ===========================
+   BASE ROUTES
+=========================== */
+app.get('/', (_req, res) => {
   res.json({
     status: 'success',
-    message: 'AKLinks Backend API is running!',
+    message: 'AKLinks Backend API running',
     version: '1.0.0',
-    endpoints: {
-      auth: '/api/v1/auth',
-      users: '/api/v1/users'
-    }
   });
 });
 
-app.get('/api/v1/health', (req, res) => {
+app.get('/api/v1/health', (_req, res) => {
   res.json({
     status: 'success',
-    message: 'Server is healthy',
+    uptime: process.uptime(),
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
   });
 });
 
-// API Routes
+/* ===========================
+   API ROUTES
+=========================== */
 app.use('/api/v1', Routes);
 
-// Error handling middleware
-app.use(notFound); // Handle 404 errors
-app.use(errorHandler); // Global error handler
+/* ===========================
+   ERROR HANDLERS
+=========================== */
+app.use(notFound);
+app.use(errorHandler);
 
-// Start server
+/* ===========================
+   START SERVER
+=========================== */
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
 
 export default app;
-
