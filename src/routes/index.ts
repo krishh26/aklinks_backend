@@ -5,6 +5,7 @@ import googleAuthRoutes from './googleAuthRoutes';
 import linkRoutes from './linkRoutes';
 import trafficSourceRoutes from './trafficSourceRoutes';
 import supportRoutes from './supportRoutes';
+import eventUserRoutes from './eventUserRoutes';
 
 const Routes = express.Router();
 
@@ -14,5 +15,6 @@ Routes.use("/auth", googleAuthRoutes);
 Routes.use("/link", linkRoutes);
 Routes.use('/traffic-source', trafficSourceRoutes);
 Routes.use('/support', supportRoutes);
+Routes.use('/event-users', eventUserRoutes);
 
 export default Routes;
