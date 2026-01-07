@@ -141,7 +141,7 @@ We're excited to have you join us for this creative experience.
 📅 Workshop Details
 
 Date: 11-01-2026
-Time: 2 to 5 PM
+Time: 3 to 5 PM
 Venue: White Valley Cafe & Multi-cuisine Restaurant https://maps.app.goo.gl/soKjcw33rw2zMvqX7
 Ticket ID: ${ticketId}
 
