@@ -101,7 +101,7 @@ export const sendEventRegistrationEmail = async (
           <strong><em>Date:</em></strong> <em>11-01-2026</em>
         </p>
         <p style="font-size: 15px; line-height: 1.8; color: #333; margin: 8px 0;">
-          <strong><em>Time:</em></strong> <em>2 to 5 PM</em>
+          <strong><em>Time:</em></strong> <em>3 to 5 PM</em>
         </p>
         <p style="font-size: 15px; line-height: 1.8; color: #333; margin: 8px 0;">
           <strong><em>Venue:</em></strong> <em>White Valley Cafe & Multi-cuisine Restaurant</em> <a href="https://maps.app.goo.gl/soKjcw33rw2zMvqX7" style="color: #6a5af9; text-decoration: none;">https://maps.app.goo.gl/soKjcw33rw2zMvqX7</a>

@@ -49,9 +49,9 @@ export const getAllEventUsers = async (req: Request, res: Response): Promise<voi
 
     const eventUsers = await EventUser.find()
       .sort({ createdAt: -1 })
-      .select('-__v')
-      .skip(skip)
-      .limit(limit);
+      .select('-__v');
+      // .skip(skip)
+      // .limit(limit);
 
     const totalItems = await EventUser.countDocuments();
     const totalPages = Math.ceil(totalItems / limit);
@@ -60,12 +60,12 @@ export const getAllEventUsers = async (req: Request, res: Response): Promise<voi
       status: 'success',
       data: {
         items: eventUsers,
-        pagination: {
-          totalItems,
-          totalPages,
-          currentPage: page,
-          limit
-        }
+        // pagination: {
+        //   totalItems,
+        //   totalPages,
+        //   currentPage: page,
+        //   limit
+        // }
       }
     });
   } catch (error: any) {
