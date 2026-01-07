@@ -38,6 +38,7 @@ app.use(
       'https://aklinks.in',
       'https://ads.aklinks.in',
       'http://localhost:4200',
+      'https://artverse.co.in'
     ],
     credentials: true,
   })
