@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import EventUser from '../models/EventUser';
+import { sendEventRegistrationEmail } from '../utils/eventEmailUtils';
 
 // Store event user data
 export const createEventUser = async (req: Request, res: Response): Promise<void> => {
@@ -16,11 +17,21 @@ export const createEventUser = async (req: Request, res: Response): Promise<void
 
     const eventUser = await EventUser.create({ data });
 
+    // Send success response immediately
     res.status(201).json({
       status: 'success',
       message: 'Event user data stored successfully',
       data: eventUser
     });
+
+    // Send confirmation email in the background (fire and forget)
+    if (data.email) {
+      const ticketId = eventUser._id.toString();
+      sendEventRegistrationEmail(data.email, data, ticketId).catch((emailError) => {
+        console.error('Error sending event registration email:', emailError);
+        // Email error doesn't affect the API response
+      });
+    }
   } catch (error: any) {
     res.status(500).json({
       status: 'error',
