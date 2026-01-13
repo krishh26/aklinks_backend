@@ -6,6 +6,7 @@ import linkRoutes from './linkRoutes';
 import trafficSourceRoutes from './trafficSourceRoutes';
 import supportRoutes from './supportRoutes';
 import eventUserRoutes from './eventUserRoutes';
+import settingsRoutes from './settingsRoutes';
 
 const Routes = express.Router();
 
@@ -16,5 +17,6 @@ Routes.use("/link", linkRoutes);
 Routes.use('/traffic-source', trafficSourceRoutes);
 Routes.use('/support', supportRoutes);
 Routes.use('/event-users', eventUserRoutes);
+Routes.use('/settings', settingsRoutes);
 
 export default Routes;
