@@ -33,8 +33,8 @@ SettingsSchema.pre('save', function (next) {
   next();
 });
 
-// Ensure only one settings document exists per key
-SettingsSchema.index({ key: 1 }, { unique: true });
+// Note: key field has unique: true which automatically creates an index
+// Do not add an explicit index for 'key' as it would create a duplicate
 
 export default mongoose.model('Settings', SettingsSchema);
 

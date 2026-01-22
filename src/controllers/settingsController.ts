@@ -113,3 +113,90 @@ export const getAllSettings = async (req: any, res: Response, next: NextFunction
   }
 };
 
+/**
+ * Get refer amount setting
+ * Public endpoint - anyone can view the refer amount
+ */
+export const getReferAmount = async (req: any, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const setting = await Settings.findOne({ key: 'refer_amount' });
+    
+    if (!setting) {
+      // If setting doesn't exist, create it with default value
+      const defaultSetting = await Settings.create({
+        key: 'refer_amount',
+        value: 0,
+        description: 'Amount credited to referrer when someone signs up using their referral code'
+      });
+      
+      res.status(200).json({
+        status: 'success',
+        message: 'Refer amount retrieved successfully',
+        data: {
+          referAmount: defaultSetting.value as number
+        }
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Refer amount retrieved successfully',
+      data: {
+        referAmount: setting.value as number
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update refer amount setting
+ * Admin only endpoint
+ */
+export const updateReferAmount = async (req: any, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        status: 'error',
+        message: 'Authentication required'
+      });
+      return;
+    }
+
+    const { referAmount } = req.body;
+
+    // Validate refer amount
+    if (referAmount === undefined || typeof referAmount !== 'number' || referAmount < 0) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Refer amount must be a non-negative number'
+      });
+      return;
+    }
+
+    // Find or create the setting
+    const setting = await Settings.findOneAndUpdate(
+      { key: 'refer_amount' },
+      {
+        key: 'refer_amount',
+        value: referAmount,
+        description: 'Amount credited to referrer when someone signs up using their referral code',
+        updatedBy: req.user._id
+      },
+      { new: true, upsert: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Refer amount updated successfully',
+      data: {
+        referAmount: setting.value as number,
+        updatedAt: setting.updatedAt
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
