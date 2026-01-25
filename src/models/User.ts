@@ -97,13 +97,13 @@ UserSchema.pre('save', async function (next) {
 
     // Generate referral code if not exists and user is new
     if ((this as any).isNew && !(this as any).referralCode) {
-      let code: string;
+      let code: string | any;
       let isUnique = false;
       const UserModel = (this as any).constructor;
       
       while (!isUnique) {
         // Generate a random 8-character alphanumeric code
-        code = Math.random().toString(36).substring(2, 10).toUpperCase();
+        code  = Math.random().toString(36).substring(2, 10).toUpperCase();
         const existingUser = await UserModel.findOne({ referralCode: code });
         if (!existingUser) {
           isUnique = true;

@@ -191,6 +191,7 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     // Send email
     try {
+      console.log("hhhhhhhhhhhhhhhhhhhhhhhhhh", user.email)
       await sendPasswordResetEmail(user.email, resetToken);
 
       res.status(200).json({
