@@ -8,6 +8,7 @@ import supportRoutes from './supportRoutes';
 import eventUserRoutes from './eventUserRoutes';
 import settingsRoutes from './settingsRoutes';
 import referralRoutes from './referralRoutes';
+import blogRoutes from './blogRoutes';
 
 const Routes = express.Router();
 
@@ -20,5 +21,6 @@ Routes.use('/support', supportRoutes);
 Routes.use('/event-users', eventUserRoutes);
 Routes.use('/settings', settingsRoutes);
 Routes.use('/referral', referralRoutes);
+Routes.use('/blog', blogRoutes);
 
 export default Routes;
