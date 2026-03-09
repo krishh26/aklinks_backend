@@ -9,6 +9,7 @@ import eventUserRoutes from './eventUserRoutes';
 import settingsRoutes from './settingsRoutes';
 import referralRoutes from './referralRoutes';
 import blogRoutes from './blogRoutes';
+import adsterraRoutes from './adsterraRoutes';
 
 const Routes = express.Router();
 
@@ -22,5 +23,6 @@ Routes.use('/event-users', eventUserRoutes);
 Routes.use('/settings', settingsRoutes);
 Routes.use('/referral', referralRoutes);
 Routes.use('/blog', blogRoutes);
+Routes.use('/adsterra', adsterraRoutes);
 
 export default Routes;
