@@ -10,6 +10,8 @@ import settingsRoutes from './settingsRoutes';
 import referralRoutes from './referralRoutes';
 import blogRoutes from './blogRoutes';
 import adsterraRoutes from './adsterraRoutes';
+import adminRoutes from './adminRoutes';
+import dashboardRoutes from './dashboardRoutes';
 
 const Routes = express.Router();
 
@@ -24,5 +26,7 @@ Routes.use('/settings', settingsRoutes);
 Routes.use('/referral', referralRoutes);
 Routes.use('/blog', blogRoutes);
 Routes.use('/adsterra', adsterraRoutes);
+Routes.use('/admin', adminRoutes);
+Routes.use('/user', dashboardRoutes);
 
 export default Routes;

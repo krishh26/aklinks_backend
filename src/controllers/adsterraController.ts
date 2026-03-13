@@ -13,28 +13,51 @@ const getApiKey = async (): Promise<string | null> => {
 
 /**
  * Make request to Adsterra API
+ * - Adds a timeout to avoid hanging requests
+ * - Normalizes JSON parsing
  */
 const adsterraRequest = async (
   endpoint: string,
   apiKey: string
 ): Promise<any> => {
   const url = `${ADSTERRA_API_BASE}${endpoint}`;
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'X-API-Key': apiKey,
-    },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000); // 15s safety timeout
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Adsterra API error: ${response.status} - ${errorText || response.statusText}`
-    );
+  try {
+    console.log('[Adsterra] Request ->', url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'X-API-Key': apiKey,
+      },
+      signal: controller.signal,
+    });
+
+    console.log('[Adsterra] Response status:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      throw new Error(
+        `Adsterra API error: ${response.status} - ${errorText || response.statusText}`
+      );
+    }
+
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : {};
+    } catch (parseErr: any) {
+      throw new Error(`Failed to parse Adsterra response JSON: ${parseErr?.message || parseErr}`);
+    }
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw new Error('Adsterra API request timed out');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return response.json();
 };
 
 /**
@@ -193,7 +216,9 @@ export const getStatistics = async (
   res: Response
 ): Promise<void> => {
   try {
+    console.log('[Adsterra] /stats request received', req.query);
     const apiKey = await getApiKey();
+    console.log('apiKey', apiKey);
     if (!apiKey) {
       res.status(400).json({
         status: 'error',
@@ -225,9 +250,10 @@ export const getStatistics = async (
     if (params.toString()) endpoint += `?${params.toString()}`;
 
     const data = await adsterraRequest(endpoint, apiKey);
+    console.log('[Adsterra] /stats response received', data);
     res.status(200).json({
       status: 'success',
-      data: data.data || data,
+      data: data,
     });
   } catch (error: any) {
     console.error('Adsterra getStatistics error:', error);
