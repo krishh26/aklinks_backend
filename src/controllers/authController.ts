@@ -223,9 +223,11 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
 
     // Find user with valid reset token
     const user = await User.findOne({
-      resetPasswordToken: hashedToken,
+      resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() }
     }).select('+resetPasswordToken +resetPasswordExpires');
+
+    console.log("useruseruser", user)
 
     if (!user) {
       res.status(400).json({

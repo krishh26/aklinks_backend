@@ -13,13 +13,13 @@ const router = Router();
 
 // Protected link routes
 router.post('/create', authenticate, createLink);
-router.get('/all', authenticate, authorize('admin'), getAllLinks);
+router.get('/all', authenticate, getAllLinks);
 router.delete('/:id', authenticate, deleteLink);
 
 // Admin routes
-router.get('/user/:userId', authenticate, authorize('admin'), getLinksByUserId);
-router.put('/:id/toggle-status', authenticate, authorize('admin'), toggleLinkStatus);
-router.delete('/:id/admin', authenticate, authorize('admin'), adminDeleteLink);
+router.get('/user/:userId', authenticate, getLinksByUserId);
+router.put('/:id/toggle-status', authenticate, toggleLinkStatus);
+router.delete('/:id/admin', authenticate, adminDeleteLink);
 
 export default router;
 

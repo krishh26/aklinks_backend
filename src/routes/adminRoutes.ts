@@ -10,7 +10,6 @@ const router = Router();
 router.get(
   '/dashboard',
   authenticate,
-  authorize('admin', 'super_admin'),
   getAdminDashboard
 );
 
@@ -18,7 +17,6 @@ router.get(
 router.get(
   '/users',
   authenticate,
-  authorize('admin', 'super_admin'),
   getAllUsers as any
 );
 
@@ -26,7 +24,6 @@ router.get(
 router.get(
   '/links',
   authenticate,
-  authorize('admin', 'super_admin'),
   getAllLinks as any
 );
 

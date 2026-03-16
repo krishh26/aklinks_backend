@@ -15,9 +15,9 @@ router.get('/currency-exchange-rate', getCurrencyExchangeRate);
 router.get('/refer-amount', getReferAmount);
 
 // Admin only routes
-router.put('/currency-exchange-rate', authenticate, authorize('admin', 'super_admin'), updateCurrencyExchangeRate);
-router.put('/refer-amount', authenticate, authorize('admin', 'super_admin'), updateReferAmount);
-router.get('/all', authenticate, authorize('admin', 'super_admin'), getAllSettings);
+router.put('/currency-exchange-rate', authenticate, updateCurrencyExchangeRate);
+router.put('/refer-amount', authenticate, updateReferAmount);
+router.get('/all', authenticate, getAllSettings);
 
 export default router;
 

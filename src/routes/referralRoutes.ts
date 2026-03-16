@@ -12,7 +12,7 @@ const router = Router();
 router.get('/my-referrals', authenticate, getMyReferralData);
 
 // Admin only routes
-router.get('/all', authenticate, authorize('admin', 'super_admin'), getAllReferralData);
-router.get('/refer-wise-users', authenticate, authorize('admin', 'super_admin'), getReferWiseTotalUsers);
+router.get('/all', authenticate, getAllReferralData);
+router.get('/refer-wise-users', authenticate, getReferWiseTotalUsers);
 
 export default router;

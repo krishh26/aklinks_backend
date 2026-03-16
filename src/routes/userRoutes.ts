@@ -24,10 +24,10 @@ router.put('/profile/:id', authenticate, updateProfileValidation, handleValidati
 router.put('/password/:id', authenticate, changePasswordValidation, handleValidationErrors, changePassword);
 
 // Admin only routes
-router.get('/all', authenticate, authorize('admin'), getAllUsers);
-router.get('/:userId', authenticate, authorize('admin'), getUserById);
-router.put('/:userId/role', authenticate, authorize('admin'), updateUserRoleValidation, handleValidationErrors, updateUserRole);
-router.put('/:userId/toggle-status', authenticate, authorize('admin'), toggleUserStatus);
-router.delete('/:userId', authenticate, authorize('admin'), deleteUserValidation, handleValidationErrors, deleteUser);
+router.get('/all', authenticate, getAllUsers);
+router.get('/:userId', authenticate, getUserById);
+router.put('/:userId/role', authenticate, updateUserRoleValidation, handleValidationErrors, updateUserRole);
+router.put('/:userId/toggle-status', authenticate, toggleUserStatus);
+router.delete('/:userId', authenticate, deleteUserValidation, handleValidationErrors, deleteUser);
 
 export default router;
