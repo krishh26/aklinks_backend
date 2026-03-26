@@ -14,6 +14,60 @@ const generateShortLink = (): string => {
   return result;
 };
 
+/**
+ * GET /link/public/:shortLink (no auth)
+ * Returns basic details for an active (non-deleted) short code.
+ */
+export const getPublicLinkByShortCode = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const raw = req.params.shortLink;
+    const shortLink = typeof raw === 'string' ? raw.trim() : '';
+
+    if (!shortLink) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Short link code is required',
+      });
+      return;
+    }
+
+    // Only allow typical short-code characters (matches generated slugs)
+    if (!/^[a-zA-Z0-9_-]+$/.test(shortLink) || shortLink.length > 64) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Invalid short link code',
+      });
+      return;
+    }
+
+    const link = await Link.findOne({ shortLink, deleted: false }).lean();
+
+    if (!link) {
+      res.status(404).json({
+        status: 'error',
+        message: 'Link not found',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        id: link._id,
+        shortLink: link.shortLink,
+        originalLink: link.originalLink,
+        clicks: link.clicks ?? 0,
+        createdAt: link.createdAt,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to resolve short link',
+    });
+  }
+};
+
 // Create a new shortened link
 export const createLink = async (req: Request, res: Response): Promise<void> => {
   try {
