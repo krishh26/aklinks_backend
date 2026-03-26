@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
+import Referral from '../models/Referral';
+import Settings from '../models/Settings';
 import { generateToken, generateResetToken } from '../utils/tokenUtils';
 import { sendPasswordResetEmail } from '../utils/emailUtils';
 import crypto from 'crypto';
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { name, email, password, role = 'user' } = req.body;
+    const { name, email, password, role = 'user', referralCode } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -18,16 +20,70 @@ export const register = async (req: Request, res: Response, next: NextFunction):
       return;
     }
 
+    // Handle referral code if provided
+    let referrer: any = null;
+    if (referralCode) {
+      const cleanReferralCode = referralCode.trim().toUpperCase();
+      referrer = await User.findOne({ referralCode: cleanReferralCode });
+      if (!referrer) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Invalid referral code'
+        });
+        return;
+      }
+      
+      // Prevent self-referral
+      if (referrer.email === email) {
+        res.status(400).json({
+          status: 'error',
+          message: 'You cannot use your own referral code'
+        });
+        return;
+      }
+    }
+
     // Create new user
     const user = new User({
       name,
       email,
       password,
       role,
-      provider: 'local'
+      provider: 'local',
+      referredBy: referrer ? referrer._id : null
     });
 
     await user.save();
+
+    // Process referral if applicable
+    if (referrer) {
+      try {
+        // Get referral amount from settings
+        const referAmountSetting = await Settings.findOne({ key: 'refer_amount' });
+        const referAmount = referAmountSetting ? (referAmountSetting.value as number) : 0;
+
+        // Always create referral record for tracking, even if amount is 0
+        const referralRecord = await Referral.create({
+          referrer: referrer._id,
+          referredUser: user._id,
+          referralCode: referralCode.trim().toUpperCase(),
+          amount: referAmount,
+          status: referAmount > 0 ? 'credited' : 'pending'
+        });
+
+        // Credit referrer's wallet if amount > 0
+        if (referAmount > 0) {
+          referrer.walletBalance = (referrer.walletBalance || 0) + referAmount;
+          await referrer.save();
+          console.log(`Credited ${referAmount} to referrer ${referrer.email}. New balance: ${referrer.walletBalance}`);
+        }
+        
+        console.log(`Referral record created: ${referrer.email} referred ${user.email}`);
+      } catch (referralError) {
+        // Log error but don't fail registration
+        console.error('Error processing referral:', referralError);
+      }
+    }
 
     // Generate token
     const token = generateToken({
@@ -45,6 +101,8 @@ export const register = async (req: Request, res: Response, next: NextFunction):
           name: user.name,
           email: user.email,
           role: user.role,
+          referralCode: (user as any).referralCode,
+          walletBalance: (user as any).walletBalance || 0,
           createdAt: user.createdAt
         },
         token
@@ -59,7 +117,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   try {
     const { email, password } = req.body;
 
-    // Find user and include password field
+    // Find user and include password field, also get wallet balance and referral code
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
@@ -96,7 +154,9 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          referralCode: (user as any).referralCode,
+          walletBalance: (user as any).walletBalance || 0
         },
         token
       }
@@ -131,6 +191,7 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     // Send email
     try {
+      console.log("hhhhhhhhhhhhhhhhhhhhhhhhhh", user.email)
       await sendPasswordResetEmail(user.email, resetToken);
 
       res.status(200).json({
@@ -162,9 +223,11 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
 
     // Find user with valid reset token
     const user = await User.findOne({
-      resetPasswordToken: hashedToken,
+      resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() }
     }).select('+resetPasswordToken +resetPasswordExpires');
+
+    console.log("useruseruser", user)
 
     if (!user) {
       res.status(400).json({
@@ -210,6 +273,8 @@ export const getMe = async (req: any, res: Response, next: NextFunction): Promis
           email: req.user.email,
           role: req.user.role,
           avatar: (req.user as any).avatar,
+          referralCode: (req.user as any).referralCode,
+          walletBalance: (req.user as any).walletBalance || 0,
           createdAt: req.user.createdAt,
           updatedAt: req.user.updatedAt
         }

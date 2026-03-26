@@ -30,17 +30,16 @@ export const googleSuccess = (req: Request, res: Response, next: NextFunction) =
     });
     
     // Redirect to frontend with token
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
     const redirectUrl = `${frontendUrl}/auth/callback?token=${token}&success=true`;
-    
-    res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
   } catch (error) {
     next(error);
   }
 };
 
 export const googleFailure = (req: Request, res: Response, next: NextFunction) => {
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
   const redirectUrl = `${frontendUrl}/auth/callback?success=false&error=google_auth_failed`;
   
   res.redirect(redirectUrl);

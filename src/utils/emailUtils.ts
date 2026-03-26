@@ -30,7 +30,7 @@ const createTransporter = () => {
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
   try {
     const transporter = createTransporter();
-
+    console.log("options.to",options.to)
     const mailOptions = {
       from: `"AKLinks Support" <${process.env.EMAIL_USER}>`,
       to: options.to,
@@ -47,7 +47,7 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
 };
 
 export const sendPasswordResetEmail = async (email: string, resetToken: string): Promise<void> => {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/auth/reset-password?token=${resetToken}`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

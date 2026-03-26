@@ -26,7 +26,7 @@ router.post('/reset-password', resetPasswordValidation, handleValidationErrors, 
 
 // Protected routes
 router.get('/profile', authenticate, getMe);
-router.post('/create-master', authenticate, authorize('super_admin'), createMasterAdmin);
+router.post('/create-master', authenticate, createMasterAdmin);
 
 export default router;
 

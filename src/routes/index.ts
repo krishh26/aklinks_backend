@@ -5,6 +5,13 @@ import googleAuthRoutes from './googleAuthRoutes';
 import linkRoutes from './linkRoutes';
 import trafficSourceRoutes from './trafficSourceRoutes';
 import supportRoutes from './supportRoutes';
+import eventUserRoutes from './eventUserRoutes';
+import settingsRoutes from './settingsRoutes';
+import referralRoutes from './referralRoutes';
+import blogRoutes from './blogRoutes';
+import adsterraRoutes from './adsterraRoutes';
+import adminRoutes from './adminRoutes';
+import dashboardRoutes from './dashboardRoutes';
 
 const Routes = express.Router();
 
@@ -14,5 +21,12 @@ Routes.use("/auth", googleAuthRoutes);
 Routes.use("/link", linkRoutes);
 Routes.use('/traffic-source', trafficSourceRoutes);
 Routes.use('/support', supportRoutes);
+Routes.use('/event-users', eventUserRoutes);
+Routes.use('/settings', settingsRoutes);
+Routes.use('/referral', referralRoutes);
+Routes.use('/blog', blogRoutes);
+Routes.use('/adsterra', adsterraRoutes);
+Routes.use('/admin', adminRoutes);
+Routes.use('/user', dashboardRoutes);
 
 export default Routes;

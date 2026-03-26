@@ -9,6 +9,6 @@ const router = Router();
 router.post('/', supportValidation, createSupport);
 
 // Admin: list all support messages
-router.get('/all', authenticate, authorize('admin'), getAllSupport);
+router.get('/all', authenticate, getAllSupport);
 
 export default router;

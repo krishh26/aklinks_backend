@@ -4,7 +4,9 @@ import {
   getAllUsers,
   updateUserRole,
   deleteUser,
-  changePassword
+  changePassword,
+  getUserById,
+  toggleUserStatus
 } from '../controllers/userController';
 import { authenticate, authorize } from '../middlewares/authMiddleware';
 import { handleValidationErrors } from '../middlewares/errorMiddleware';
@@ -22,8 +24,10 @@ router.put('/profile/:id', authenticate, updateProfileValidation, handleValidati
 router.put('/password/:id', authenticate, changePasswordValidation, handleValidationErrors, changePassword);
 
 // Admin only routes
-router.get('/all', authenticate, authorize('admin'), getAllUsers);
-router.put('/:userId/role', authenticate, authorize('admin'), updateUserRoleValidation, handleValidationErrors, updateUserRole);
-router.delete('/:userId', authenticate, authorize('admin'), deleteUserValidation, handleValidationErrors, deleteUser);
+router.get('/all', authenticate, getAllUsers);
+router.get('/:userId', authenticate, getUserById);
+router.put('/:userId/role', authenticate, updateUserRoleValidation, handleValidationErrors, updateUserRole);
+router.put('/:userId/toggle-status', authenticate, toggleUserStatus);
+router.delete('/:userId', authenticate, deleteUserValidation, handleValidationErrors, deleteUser);
 
 export default router;

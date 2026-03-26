@@ -147,6 +147,8 @@ export const deleteLink = async (req: Request, res: Response): Promise<void> => 
 export const getLinksByUserId = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
+    const search = req.query.search as string || '';
+    const status = req.query.status as string || 'all';
 
     if (!userId) {
       res.status(400).json({
@@ -156,13 +158,41 @@ export const getLinksByUserId = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    const links = await Link.find({ userId, deleted: false })
+    // Build filter object
+    let filter: any = { userId };
+
+    // Status filter: 'active' means deleted: false, 'inactive' means deleted: true
+    if (status === 'active') {
+      filter.deleted = false;
+    } else if (status === 'inactive') {
+      filter.deleted = true;
+    } else {
+      // 'all' - include both active and inactive
+      // No filter on deleted field
+    }
+
+    // Search filter: search in shortLink and originalLink
+    if (search) {
+      filter.$or = [
+        { shortLink: { $regex: search, $options: 'i' } },
+        { originalLink: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const links = await Link.find(filter)
       .sort({ createdAt: -1 })
       .select('-__v');
 
+    // Map deleted field to status for frontend compatibility
+    const mappedLinks = links.map(link => ({
+      ...link.toObject(),
+      status: link.deleted ? 'inactive' : 'active',
+      id: link._id.toString()
+    }));
+
     res.status(200).json({
       status: 'success',
-      data: links
+      data: mappedLinks
     });
   } catch (error: any) {
     res.status(500).json({
@@ -210,6 +240,54 @@ export const adminDeleteLink = async (req: Request, res: Response): Promise<void
     res.status(500).json({
       status: 'error',
       message: error.message || 'Failed to delete link'
+    });
+  }
+};
+
+// Admin toggle link status (active/inactive)
+export const toggleLinkStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Link ID is required'
+      });
+      return;
+    }
+
+    const link = await Link.findById(id);
+
+    if (!link) {
+      res.status(404).json({
+        status: 'error',
+        message: 'Link not found'
+      });
+      return;
+    }
+
+    // Toggle deleted status: active (deleted: false) <-> inactive (deleted: true)
+    link.deleted = !link.deleted;
+    if (link.deleted) {
+      link.deletedAt = new Date();
+    }
+    
+    await link.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: `Link ${link.deleted ? 'deactivated' : 'activated'} successfully`,
+      data: {
+        id: link._id,
+        deleted: link.deleted,
+        status: link.deleted ? 'inactive' : 'active'
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to toggle link status'
     });
   }
 };
