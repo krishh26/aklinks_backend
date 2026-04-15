@@ -1,6 +1,8 @@
 import { Response, NextFunction } from 'express';
 import Settings from '../models/Settings';
 
+const DEFAULT_CPM_VALUE = 5;
+
 /**
  * Get currency exchange rate setting
  * Public endpoint - anyone can view the exchange rate
@@ -195,6 +197,91 @@ export const updateReferAmount = async (req: any, res: Response, next: NextFunct
         referAmount: setting.value as number,
         updatedAt: setting.updatedAt
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get CPM (Cost Per Mille) setting
+ * Public endpoint - anyone can view the CPM value
+ */
+export const getCpmValue = async (req: any, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const setting = await Settings.findOne({ key: 'cpm_value' });
+
+    if (!setting) {
+      const defaultSetting = await Settings.create({
+        key: 'cpm_value',
+        value: DEFAULT_CPM_VALUE,
+        description: 'CPM value used for system-wide calculations (USD per 1000 impressions)',
+      });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'CPM value retrieved successfully',
+        data: {
+          cpm: defaultSetting.value as number,
+        },
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'CPM value retrieved successfully',
+      data: {
+        cpm: setting.value as number,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update CPM (Cost Per Mille) setting
+ * Admin only endpoint
+ */
+export const updateCpmValue = async (req: any, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        status: 'error',
+        message: 'Authentication required',
+      });
+      return;
+    }
+
+    const { cpm } = req.body;
+
+    if (cpm === undefined || typeof cpm !== 'number' || cpm <= 0) {
+      res.status(400).json({
+        status: 'error',
+        message: 'CPM must be a positive number',
+      });
+      return;
+    }
+
+    const setting = await Settings.findOneAndUpdate(
+      { key: 'cpm_value' },
+      {
+        key: 'cpm_value',
+        value: cpm,
+        description: 'CPM value used for system-wide calculations (USD per 1000 impressions)',
+        updatedBy: req.user._id,
+      },
+      { new: true, upsert: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: 'CPM value updated successfully',
+      data: {
+        cpm: setting.value as number,
+        updatedAt: setting.updatedAt,
+      },
     });
   } catch (error) {
     next(error);
